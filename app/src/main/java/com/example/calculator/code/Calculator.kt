@@ -1,6 +1,6 @@
 package com.example.calculator.code
 
-class Calculator {
+object Calculator {
     fun computeFromString(expression: String) : String {
         try {
             val result = Algorithm(Parser.parseToTokens(expression)).evaluate()
