@@ -6,24 +6,27 @@ import java.util.*
 //Если надо добавить операторы с новыми типами поведения, придется писать новый алгоритм
 class Algorithm(private val expression: List<Token>) {
     private val stackOfNumberTokens: Stack<NumberToken> = Stack()
-    private val stackOfNonNumberTokens: Stack<Token> = Stack()
-    private val stackOfIndexes: Stack<Int> = Stack()
+    private val stackOfNonNumberTokens: Stack<NonNumberToken> = Stack()
+
+    inner class NonNumberToken(val index: Int, val token: Token)
 
     fun evaluate(): Double {
         checkForBinaryUnaryOperatorsMixUsage(expression)
 
         expression.mapIndexed { index, token ->
             when {
-                token is OpenBracket -> stackOfNonNumberTokens.push(OpenBracket)
-                token is ClosedBracket -> closedBracketAvalanche()
+                token is OpenBracket -> {
+                    stackOfNonNumberTokens.push(NonNumberToken(index, OpenBracket))
+                }
+                token is ClosedBracket -> {
+                    closedBracketAvalanche()
+                }
                 isUnary(index) -> {
-                    stackOfNonNumberTokens.push(token)
-                    stackOfIndexes.push(index)
+                    stackOfNonNumberTokens.push(NonNumberToken(index, token))
                 }
                 isInfix(index) -> {
                     priorityAvalanche((token as BinaryInfixOperatorToken).priority)
-                    stackOfNonNumberTokens.push(token)
-                    stackOfIndexes.push(index)
+                    stackOfNonNumberTokens.push(NonNumberToken(index, token))
                 }
                 token is NumberToken -> {
                     stackOfNumberTokens.push(token)
@@ -67,18 +70,18 @@ class Algorithm(private val expression: List<Token>) {
 
     private fun closedBracketAvalanche() {
         while (stackOfNonNumberTokens.isNotEmpty()
-            && (stackOfNonNumberTokens.peek() !is OpenBracket)
+            && (stackOfNonNumberTokens.peek().token !is OpenBracket)
         ) {
             calculateFromTopOperator()
-            stackOfNonNumberTokens.pop()
         }
+        stackOfNonNumberTokens.pop()
     }
 
     private fun priorityAvalanche(stopPriority: Int) {
         while (stackOfNonNumberTokens.isNotEmpty()
-            && ((stackOfNonNumberTokens.peek() is BinaryInfixOperatorToken
-                    && (stackOfNonNumberTokens.peek() as BinaryInfixOperatorToken).priority >= stopPriority)
-                    || (stackOfNonNumberTokens.peek() is UnaryOperatorToken))
+            && ((isInfix(stackOfNonNumberTokens.peek().index)
+                    && (stackOfNonNumberTokens.peek().token as BinaryInfixOperatorToken).priority >= stopPriority)
+                    || (isUnary(stackOfNonNumberTokens.peek().index)))
         ) {
             calculateFromTopOperator()
         }
@@ -86,14 +89,14 @@ class Algorithm(private val expression: List<Token>) {
 
     private fun calculateFromTopOperator() {
         val topOperatorToken = stackOfNonNumberTokens.pop()
-        val index = stackOfIndexes.pop()
+        val index = topOperatorToken.index
         when {
             isUnary(index) -> {
                 if (stackOfNumberTokens.size < 1) {
                     throw ArithmeticException("Not enough arguments for operator")
                 }
                 stackOfNumberTokens.push(
-                    (topOperatorToken as UnaryOperatorToken).evaluate(
+                    (topOperatorToken.token as UnaryOperatorToken).evaluate(
                         stackOfNumberTokens.pop()
                     )
                 )
@@ -106,7 +109,7 @@ class Algorithm(private val expression: List<Token>) {
                 val secondNumber = stackOfNumberTokens.pop()
                 val firstNumber = stackOfNumberTokens.pop()
                 stackOfNumberTokens.push(
-                    (topOperatorToken as BinaryInfixOperatorToken).evaluate(
+                    (topOperatorToken.token as BinaryInfixOperatorToken).evaluate(
                         firstNumber,
                         secondNumber
                     )
