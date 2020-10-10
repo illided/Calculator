@@ -12,7 +12,7 @@ fun createNumberToken(stringPresentation: String): NumberToken =
 fun createNumberToken(value: Double): NumberToken =
     NumberToken(value.toString(), value)
 
-interface BinaryOperatorToken : Token {
+interface BinaryInfixOperatorToken : Token {
     val priority: Int
     fun evaluate(firstNumber: NumberToken, secondNumber: NumberToken): NumberToken
 }

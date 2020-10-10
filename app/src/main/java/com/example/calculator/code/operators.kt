@@ -11,7 +11,7 @@ object ClosedBracket: Token {
     override val stringPresentation: String = ")"
 }
 
-object Minus : UnaryOperatorToken, BinaryOperatorToken {
+object Minus : UnaryOperatorToken, BinaryInfixOperatorToken {
     override val priority: Int = 1
     override val stringPresentation: String = "-"
     override fun evaluate(firstNumber: NumberToken): NumberToken =
@@ -21,7 +21,7 @@ object Minus : UnaryOperatorToken, BinaryOperatorToken {
         createNumberToken(firstNumber.value - secondNumber.value)
 }
 
-object Plus : UnaryOperatorToken, BinaryOperatorToken {
+object Plus : UnaryOperatorToken, BinaryInfixOperatorToken {
     override val priority: Int = 1
     override val stringPresentation: String = "+"
     override fun evaluate(firstNumber: NumberToken): NumberToken =
@@ -31,16 +31,19 @@ object Plus : UnaryOperatorToken, BinaryOperatorToken {
         createNumberToken(firstNumber.value + secondNumber.value)
 }
 
-object Multiply : BinaryOperatorToken {
+object Multiply : BinaryInfixOperatorToken {
     override val priority: Int = 2
     override val stringPresentation: String = "*"
     override fun evaluate(firstNumber: NumberToken, secondNumber: NumberToken): NumberToken =
         createNumberToken(firstNumber.value * secondNumber.value)
 }
 
-object Divide : BinaryOperatorToken {
+object Divide : BinaryInfixOperatorToken {
     override val priority: Int = 2
     override val stringPresentation: String = "/"
-    override fun evaluate(firstNumber: NumberToken, secondNumber: NumberToken): NumberToken =
-        createNumberToken(firstNumber.value / secondNumber.value)
+    override fun evaluate(firstNumber: NumberToken, secondNumber: NumberToken): NumberToken {
+        if (secondNumber.value == 0.0) {
+            throw ArithmeticException("Division by 0")
+        }
+        return createNumberToken(firstNumber.value / secondNumber.value)}
 }
