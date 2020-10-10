@@ -7,8 +7,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.example.calculator.code.Algorithm
-import com.example.calculator.code.Parser
+import com.example.calculator.code.Expression
 
 class MainActivity : AppCompatActivity() {
     lateinit var textForm: EditText
@@ -32,12 +31,12 @@ class MainActivity : AppCompatActivity() {
     inner class Calculator : AsyncTask<String, Unit, String>() {
         override fun doInBackground(vararg params: String): String? {
             try {
-                val result = Algorithm(Parser.parseToTokens(params[0])).evaluate()
+                val result = Expression(params[0]).value
                 return "Result:\n$result"
             } catch (e: IllegalArgumentException) {
-                return "Error while parsing:\n" + e.message
+                return "Error while parsing"
             } catch (e: ArithmeticException) {
-                return "Error while computing:\n" + e.message
+                return "Error while computing"
             }
         }
 

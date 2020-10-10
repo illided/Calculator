@@ -11,7 +11,9 @@ class Algorithm(private val expression: List<Token>) {
     inner class NonNumberToken(val index: Int, val token: Token)
 
     fun evaluate(): Double {
-        checkForBinaryUnaryOperatorsMixUsage(expression)
+        checkForBinaryUnaryOperatorsMixUsage()
+        checkForCorrectBracketUsage()
+
 
         expression.mapIndexed { index, token ->
             when {
@@ -36,13 +38,13 @@ class Algorithm(private val expression: List<Token>) {
         }
 
         if (stackOfNonNumberTokens.size != 0 || stackOfNumberTokens.size != 1) {
-            throw ArithmeticException("Some part of expression was not calculated")
+            throw ArithmeticException("Some tokens left in stack")
         } else {
             return stackOfNumberTokens.pop().value
         }
     }
 
-    private fun checkForBinaryUnaryOperatorsMixUsage(expression: List<Token>) {
+    private fun checkForBinaryUnaryOperatorsMixUsage() {
         for (i in 1..expression.size - 2) {
             if (expression[i] is UnaryOperatorToken
                 && expression[i] is BinaryInfixOperatorToken
@@ -51,6 +53,24 @@ class Algorithm(private val expression: List<Token>) {
             ) {
                 throw ArithmeticException("Wrong usage of binary/unary operator")
             }
+        }
+    }
+
+    private fun checkForCorrectBracketUsage() {
+        var numOfOpenBrackets = 0
+        for (token in expression) {
+            if (token is OpenBracket) {
+                numOfOpenBrackets++
+            } else if (token is ClosedBracket) {
+                if (numOfOpenBrackets > 0) {
+                    numOfOpenBrackets--
+                } else {
+                    throw ArithmeticException("Wrong bracket usage")
+                }
+            }
+        }
+        if (numOfOpenBrackets != 0) {
+            throw ArithmeticException("Wrong bracket usage")
         }
     }
 
