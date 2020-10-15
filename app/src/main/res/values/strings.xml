@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">Calculator</string>
-    <string name="expressionText" />
-    <string name="buttonText">Compute</string>
-    <string name="greetingsText">" Enter your expression below to get the result. The following operations are supported: multiplication (*), addition (+), subtraction (-) and division (/)"</string>
-    <string name="outputText">Result:</string>
-</resources>
